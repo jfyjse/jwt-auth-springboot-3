@@ -19,13 +19,13 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${application.security.jwt.secret-key}")
-    private  String secretKey;
+    private String secretKey;
 
     @Value("${application.security.jwt.access-token-expiration}")
-    private  long accessTokenExpiration;
+    private long accessTokenExpiration;
 
     @Value("${application.security.jwt.refresh-token-expiration}")
-    private  long refreshTokenExpiration;
+    private long refreshTokenExpiration;
 
     private final TokenRepository tokenRepository;
 
@@ -48,6 +48,14 @@ public class JwtService {
 
         return (username.equals(user.getUsername())) && !isTokenExpired(token) && validToken;
     }
+
+    public boolean isValidRefreshToken(String token, Users users) {
+        String username = extractUsername(token);
+
+
+        return (username.equals(users.getUsername())) && !isTokenExpired(token);
+    }
+
 
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
@@ -82,13 +90,13 @@ public class JwtService {
 
     }
 
-    private String generateToken(Users users, long expiryTime){
+    private String generateToken(Users users, long expiryTime) {
 
         return Jwts
                 .builder()
                 .subject(users.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiryTime ))
+                .expiration(new Date(System.currentTimeMillis() + expiryTime))
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -97,5 +105,5 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
 }
+
