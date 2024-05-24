@@ -7,7 +7,6 @@ import com.jwt.auth.model.Users;
 import com.jwt.auth.repository.TokenRepository;
 import com.jwt.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,9 +93,7 @@ public class AuthenticationService {
             return;
         }
 
-        validTokens.forEach(t-> {
-            t.setLoggedOut(true);
-        });
+        validTokens.forEach(t-> t.setLoggedOut(true));
 
         tokenRepository.saveAll(validTokens);
     }
@@ -109,8 +106,7 @@ public class AuthenticationService {
         tokenRepository.save(token);
     }
 
-    public ResponseEntity <AuthenticationResponse>refreshToken(HttpServletRequest request,
-                                               HttpServletResponse response) {
+    public ResponseEntity <AuthenticationResponse>refreshToken(HttpServletRequest request) {
         //extract token from request
        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 

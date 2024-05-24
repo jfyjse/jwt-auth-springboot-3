@@ -5,7 +5,6 @@ import com.jwt.auth.model.AuthenticationResponse;
 import com.jwt.auth.model.Users;
 import com.jwt.auth.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,9 +36,8 @@ public class AuthenticationController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<AuthenticationResponse> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletRequest request
     ) {
-        return authService.refreshToken(request, response);
+        return authService.refreshToken(request);
     }
 }

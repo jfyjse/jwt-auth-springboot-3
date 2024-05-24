@@ -1,6 +1,7 @@
 package com.jwt.auth.service;
 
 
+import com.jwt.auth.model.Token;
 import com.jwt.auth.model.Users;
 import com.jwt.auth.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
@@ -42,25 +43,25 @@ public class JwtService {
         String username = extractUsername(token);
 
         boolean validToken = tokenRepository.findByAccessToken(token)
-                .map(t -> !t.isLoggedOut())
+                .map(t -> t.isLoggedOut())
                 .orElse(false);
 
-        return (username.equals(user.getUsername())) && !isTokenExpired(token) && validToken;
+        return (username.equals(user.getUsername())) && isTokenExpired(token) && validToken;
     }
 
     public boolean isValidRefreshToken(String token, Users users) {
         String username = extractUsername(token);
         boolean validRefreshToken = tokenRepository
                 .findByRefreshToken(token)
-                .map(t -> !t.isLoggedOut())
+                .map(Token::isLoggedOut)
                 .orElse(false);
 
-        return (username.equals(users.getUsername())) && !isTokenExpired(token) && validRefreshToken;
+        return (username.equals(users.getUsername())) && isTokenExpired(token) && validRefreshToken;
     }
 
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        return !extractExpiration(token).before(new Date());
     }
 
     private Date extractExpiration(String token) {

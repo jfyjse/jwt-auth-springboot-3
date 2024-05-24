@@ -50,7 +50,7 @@ public class Token {
     }
 
     public boolean isLoggedOut() {
-        return loggedOut;
+        return !loggedOut;
     }
 
     public void setLoggedOut(boolean loggedOut) {
