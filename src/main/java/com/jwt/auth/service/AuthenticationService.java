@@ -123,8 +123,12 @@ public class AuthenticationService {
        Users users = repository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException("user not found"));
        if (jwtService.isValidRefreshToken(token, users)){
 
-         String accessToken = jwtService.generateAccessToken(users);
-         String refreshToken = jwtService.generateRefreshToken(users);
+           String accessToken = jwtService.generateAccessToken(users);
+           String refreshToken = jwtService.generateRefreshToken(users);
+
+           revokeAllTokenByUser(users);
+           saveUserToken(accessToken, users);
+
          return new ResponseEntity(new AuthenticationResponse(accessToken,refreshToken), HttpStatus.OK);
        }
        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
