@@ -109,13 +109,13 @@ public class AuthenticationService {
         tokenRepository.save(token);
     }
 
-    public ResponseEntity refreshToken(HttpServletRequest request,
+    public ResponseEntity <AuthenticationResponse>refreshToken(HttpServletRequest request,
                                                HttpServletResponse response) {
         //extract token from request
        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
        if (authHeader==null || !authHeader.startsWith("Bearer ")){
-           return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+           return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
        }
 
        String token = authHeader.substring(7);
@@ -130,8 +130,8 @@ public class AuthenticationService {
            revokeAllTokenByUser(users);
            saveUserToken(accessToken, refreshToken, users);
 
-         return new ResponseEntity(new AuthenticationResponse(accessToken,refreshToken), HttpStatus.OK);
+         return new ResponseEntity<>(new AuthenticationResponse(accessToken,refreshToken), HttpStatus.OK);
        }
-       return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+       return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }
