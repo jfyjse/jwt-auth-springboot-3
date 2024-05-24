@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,15 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "4bb6d1dfbafb64a681139d1586b6f1160d18159afd57c8c79136d7490630407c";
+    @Value("${application.security.jwt.secret-key}")
+    private  String secretKey;
+
+    @Value("${application.security.jwt.access-token-expiration}")
+    private  long accessTokenExpiration;
+
+    @Value("${application.security.jwt.refresh-token-expiration}")
+    private  long refreshTokenExpiration;
+
     private final TokenRepository tokenRepository;
 
     public JwtService(TokenRepository tokenRepository) {
@@ -56,27 +65,36 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parser()
-                .verifyWith(getSigninKey())
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
 
-    public String generateToken(Users users) {
-        String token = Jwts
+    public String generateAccessToken(Users users) {
+        return generateToken(users, accessTokenExpiration);
+    }
+
+    public String generateRefreshToken(Users users) {
+
+        return generateToken(users, refreshTokenExpiration);
+
+    }
+
+    private String generateToken(Users users, long expiryTime){
+
+        return Jwts
                 .builder()
                 .subject(users.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 24*60*60*1000 ))
-                .signWith(getSigninKey())
+                .expiration(new Date(System.currentTimeMillis() + expiryTime ))
+                .signWith(getSigningKey())
                 .compact();
-
-        return token;
     }
 
-    private SecretKey getSigninKey() {
-        byte[] keyBytes = Decoders.BASE64URL.decode(SECRET_KEY);
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

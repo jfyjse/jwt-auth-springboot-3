@@ -54,11 +54,13 @@ public class AuthenticationService {
 
         users = repository.save(users);
 
-        String jwt = jwtService.generateToken(users);
+        String accessToken = jwtService.generateAccessToken(users);
 
-        saveUserToken(jwt, users);
+        String refreshToken = jwtService.generateRefreshToken(users);
 
-        return new AuthenticationResponse(jwt, "User registration was successful");
+        saveUserToken(accessToken, users);
+
+        return new AuthenticationResponse(accessToken, refreshToken);
 
     }
 
@@ -71,12 +73,13 @@ public class AuthenticationService {
         );
 
         Users users = repository.findByUsername(request.getUsername()).orElseThrow();
-        String jwt = jwtService.generateToken(users);
+        String accessToken = jwtService.generateAccessToken(users);
+        String refreshToken = jwtService.generateRefreshToken(users);
 
         revokeAllTokenByUser(users);
-        saveUserToken(jwt, users);
+        saveUserToken(accessToken, users);
 
-        return new AuthenticationResponse(jwt, "User login was successful");
+        return new AuthenticationResponse(accessToken, refreshToken);
 
     }
     private void revokeAllTokenByUser(Users users) {
