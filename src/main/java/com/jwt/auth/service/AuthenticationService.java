@@ -64,7 +64,7 @@ public class AuthenticationService {
 
         String refreshToken = jwtService.generateRefreshToken(users);
 
-        saveUserToken(accessToken, users);
+        saveUserToken(accessToken, refreshToken, users);
 
         return new AuthenticationResponse(accessToken, refreshToken);
 
@@ -83,13 +83,13 @@ public class AuthenticationService {
         String refreshToken = jwtService.generateRefreshToken(users);
 
         revokeAllTokenByUser(users);
-        saveUserToken(accessToken, users);
+        saveUserToken(accessToken, refreshToken, users);
 
         return new AuthenticationResponse(accessToken, refreshToken);
 
     }
     private void revokeAllTokenByUser(Users users) {
-        List<Token> validTokens = tokenRepository.findAllTokensByUser(users.getId());
+        List<Token> validTokens = tokenRepository.findAllAccessTokensByUser(users.getId());
         if(validTokens.isEmpty()) {
             return;
         }
@@ -100,9 +100,10 @@ public class AuthenticationService {
 
         tokenRepository.saveAll(validTokens);
     }
-    private void saveUserToken(String jwt, Users users) {
+    private void saveUserToken(String accessToken, String refreshToken, Users users) {
         Token token = new Token();
-        token.setToken(jwt);
+        token.setAccessToken(accessToken);
+        token.setRefreshToken(refreshToken);
         token.setLoggedOut(false);
         token.setUsers(users);
         tokenRepository.save(token);
@@ -127,7 +128,7 @@ public class AuthenticationService {
            String refreshToken = jwtService.generateRefreshToken(users);
 
            revokeAllTokenByUser(users);
-           saveUserToken(accessToken, users);
+           saveUserToken(accessToken, refreshToken, users);
 
          return new ResponseEntity(new AuthenticationResponse(accessToken,refreshToken), HttpStatus.OK);
        }

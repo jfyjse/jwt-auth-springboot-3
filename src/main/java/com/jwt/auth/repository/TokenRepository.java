@@ -11,7 +11,10 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
 
     @Query(value = "SELECT t.* FROM token t INNER JOIN \"users\" u ON t.user_id = u.id WHERE t.user_id = 1 AND t.is_logged_out = false;", nativeQuery = true)
 
-    List<Token> findAllTokensByUser(Integer userId);
+    List<Token> findAllAccessTokensByUser(Integer userId);
 
-    Optional<Token> findByToken(String token);
+    Optional<Token> findByAccessToken(String token);
+
+    Optional<Token> findByRefreshToken(String token);
 }
+
