@@ -19,17 +19,33 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        System.out.println(session.getId());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        broadcast(message);
+
+        String payload =  message.getPayload();
+        System.out.println(payload);
+            broadcast(message);
     }
+
+    public void disconnectSession(WebSocketSession session) {
+        try {
+            session.close(CloseStatus.NORMAL);
+            System.out.println("WebSocket session disconnected");
+        } catch (Exception e) {
+            System.err.println("Error while disconnecting WebSocket session: " + e.getMessage());
+        }
+    }
+
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         sessions.remove(session);
+        System.out.println("session closes"+session.getId());
     }
+
 
     private void broadcast(TextMessage message) throws IOException {
         synchronized (sessions) {
