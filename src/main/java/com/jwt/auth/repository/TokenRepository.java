@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface TokenRepository extends JpaRepository<Token, Integer> {
 
-    @Query(value = "SELECT t.* FROM token t INNER JOIN \"users\" u ON t.user_id = u.id WHERE t.user_id = 1 AND t.is_logged_out = false;", nativeQuery = true)
+    @Query(value = "SELECT t.* FROM token", nativeQuery = true)
 
     List<Token> findAllAccessTokensByUser(Integer userId);
 

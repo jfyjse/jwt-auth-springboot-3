@@ -11,10 +11,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Component
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {

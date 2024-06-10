@@ -3,16 +3,12 @@ package com.jwt.auth.service;
 
 import com.jwt.auth.model.AuthenticationResponse;
 import com.jwt.auth.model.Token;
-import com.jwt.auth.model.Users;
 import com.jwt.auth.repository.TokenRepository;
-import com.jwt.auth.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +17,7 @@ import java.util.List;
 @Service
 public class AuthenticationService {
 
-    private final UserRepository repository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
@@ -29,66 +25,66 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(UserRepository repository,
-                                 PasswordEncoder passwordEncoder,
-                                 JwtService jwtService,
-                                 TokenRepository tokenRepository,
-                                 AuthenticationManager authenticationManager) {
-        this.repository = repository;
+    public AuthenticationService(PasswordEncoder passwordEncoder, JwtService jwtService, TokenRepository tokenRepository, AuthenticationManager authenticationManager) {
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.tokenRepository = tokenRepository;
         this.authenticationManager = authenticationManager;
     }
 
-    public AuthenticationResponse register(Users request) {
 
-        // check if user already exist. if exist than authenticate the user
-        if(repository.findByUsername(request.getUsername()).isPresent()) {
-            return new AuthenticationResponse(null, "User already exist");
-        }
+//    public AuthenticationResponse register(Users request) {
+//
+//        // check if user already exist. if exist than authenticate the user
+//        if(repository.findByUsername(request.getUsername()).isPresent()) {
+//            return new AuthenticationResponse(null, "User already exist");
+//        }
+//
+//        Users users = new Users();
+//        users.setFirstName(request.getFirstName());
+//        users.setLastName(request.getLastName());
+//        users.setUsername(request.getUsername());
+//        users.setPassword(passwordEncoder.encode(request.getPassword()));
+//
+//
+//        users.setRole(request.getRole());
+//
+//        users = repository.save(users);
+//
+//        String accessToken = jwtService.generateAccessToken(users);
+//
+//        String refreshToken = jwtService.generateRefreshToken(users);
+//
+//        saveUserToken(accessToken, refreshToken, users);
+//
+//        return new AuthenticationResponse(accessToken, refreshToken);
+//
+//    }
 
-        Users users = new Users();
-        users.setFirstName(request.getFirstName());
-        users.setLastName(request.getLastName());
-        users.setUsername(request.getUsername());
-        users.setPassword(passwordEncoder.encode(request.getPassword()));
+    public AuthenticationResponse authenticate(String username) {
+//        authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        request.getUsername(),
+//                        request.getPassword()
+//                )
+//        );
 
+      //  Users users = repository.findByUsername(request.getUsername()).orElseThrow();
+        String accessToken = jwtService.generateAccessToken(username);
+        String refreshToken = jwtService.generateRefreshToken(username);
 
-        users.setRole(request.getRole());
+        System.out.println(accessToken);
+        System.out.println(refreshToken);
 
-        users = repository.save(users);
-
-        String accessToken = jwtService.generateAccessToken(users);
-
-        String refreshToken = jwtService.generateRefreshToken(users);
-
-        saveUserToken(accessToken, refreshToken, users);
+       // revokeAllTokenByUser(username);
+        saveUserToken(accessToken, refreshToken, username);
 
         return new AuthenticationResponse(accessToken, refreshToken);
 
     }
-
-    public AuthenticationResponse authenticate(Users request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
-
-        Users users = repository.findByUsername(request.getUsername()).orElseThrow();
-        String accessToken = jwtService.generateAccessToken(users);
-        String refreshToken = jwtService.generateRefreshToken(users);
-
-        revokeAllTokenByUser(users);
-        saveUserToken(accessToken, refreshToken, users);
-
-        return new AuthenticationResponse(accessToken, refreshToken);
-
-    }
-    private void revokeAllTokenByUser(Users users) {
-        List<Token> validTokens = tokenRepository.findAllAccessTokensByUser(users.getId());
+    private void revokeAllTokenByUser(String users) {
+        System.out.println("revoke need to update !!");
+        List<Token> validTokens = tokenRepository.findAllAccessTokensByUser(1);
         if(validTokens.isEmpty()) {
             return;
         }
@@ -97,12 +93,12 @@ public class AuthenticationService {
 
         tokenRepository.saveAll(validTokens);
     }
-    private void saveUserToken(String accessToken, String refreshToken, Users users) {
+    private void saveUserToken(String accessToken, String refreshToken, String users) {
         Token token = new Token();
         token.setAccessToken(accessToken);
         token.setRefreshToken(refreshToken);
         token.setLoggedOut(false);
-        token.setUsers(users);
+        token.setUserId(users);
         tokenRepository.save(token);
     }
 
@@ -117,14 +113,14 @@ public class AuthenticationService {
        String token = authHeader.substring(7);
        String username = jwtService.extractUsername(token);
 
-       Users users = repository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException("user not found"));
-       if (jwtService.isValidRefreshToken(token, users)){
+       //Users users = repository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException("user not found"));
+       if (jwtService.isValidRefreshToken(token, username)){
 
-           String accessToken = jwtService.generateAccessToken(users);
-           String refreshToken = jwtService.generateRefreshToken(users);
+           String accessToken = jwtService.generateAccessToken(username);
+           String refreshToken = jwtService.generateRefreshToken(username);
 
-           revokeAllTokenByUser(users);
-           saveUserToken(accessToken, refreshToken, users);
+           revokeAllTokenByUser(username);
+           saveUserToken(accessToken, refreshToken, username);
 
          return new ResponseEntity<>(new AuthenticationResponse(accessToken,refreshToken), HttpStatus.OK);
        }

@@ -21,9 +21,8 @@ public class Token {
     @Column(name = "is_logged_out")
     private boolean loggedOut;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Users users;
+   @Column(name = "user_id")
+    private String userId;
 
     public String getRefreshToken() {
         return refreshToken;
@@ -57,11 +56,11 @@ public class Token {
         this.loggedOut = loggedOut;
     }
 
-    public Users getUsers() {
-        return users;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUsers(Users users) {
-        this.users = users;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
