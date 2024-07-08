@@ -1,7 +1,9 @@
 package com.jwt.auth.service;
 
 
+import com.jwt.auth.model.Users;
 import com.jwt.auth.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,8 +19,14 @@ public class UserDetailsServiceImp implements UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repository.findByUsername(username)
-                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
+
+        Users user = repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with id: " + username));
+        return UserDetailsImpl.build(user);
+
+//        return repository.findByUsername(username)
+//                .orElseThrow(()-> new UsernameNotFoundException("User not found"));
     }
 }

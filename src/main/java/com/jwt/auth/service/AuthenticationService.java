@@ -52,10 +52,11 @@ public class AuthenticationService {
         users.setFirstName(request.getFirstName());
         users.setLastName(request.getLastName());
         users.setUsername(request.getUsername());
+        users.setEmail(request.getEmail());
         users.setPassword(passwordEncoder.encode(request.getPassword()));
 
 
-        users.setRole(request.getRole());
+        //users.setRole(request.getRole());
 
         users = repository.save(users);
 
